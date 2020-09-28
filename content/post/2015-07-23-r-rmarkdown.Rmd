@@ -83,7 +83,7 @@ ggplot(data3, aes(x = `Age Group`, y = `probability for not cured in different a
      
 # Appendix
 
-<font size=3>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Code and data supporting this analysis is available at: https://github.com/erikaaa233/Erika-STA304-A1</font>   
+<font size=3>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Code and data supporting this analysis is available at:https://github.com/erikaaa233/Jiayi-YANG-STA304</font>   
 
 
 # References
