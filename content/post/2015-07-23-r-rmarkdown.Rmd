@@ -1,0 +1,89 @@
+---
+title: "What would be the risk factors for severe COVID-19? A population-based statistical study of 17872 patients record in Toronto"
+author: "Jiayi YANG (1004244212)"
+date: 2020-09-27T21:13:14-05:00
+categories: ["R"]
+tags: ["R Markdown", "plot", "regression"]
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE)
+```
+# <font color=DarkBlue>Abstract</font>
+<font size=4>Objective:</font>  
+<font size=4>Based on statistical analysis, examine what features would make people in risk for severe COVID-19, and what could we do to prevent this epidemic in some degree.</font>  
+<font size=4>Results:</font>   
+<font size=3>Age and source are two risk factors, while gender is not. To prevent illness, people should be away from crowded people and treatments in the hospital could make people have higher probability to be cured.</font>    
+     
+     
+# I. Introduction
+<font size=3>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Since the end of 2019, an epidemic called COVID-19 has spread around the world. This is a new kind of virus which will cause respiratory illness in animals and peoples, and researches have shown that it can be transmitted from person-to-person through respiratory droplets @covid19intro1. The severity of COVID-19 is highly polarized. For mild patients they might have a fever, muscle aches, runny nose or even do not experience any symptoms; however, for those critical patients they might have respiratory failure, multiple organ dysfunction or even death @covid19intro1. Some studies of the similar types of respiratory diseases have shown that some characteristic groups of people will more likely to be infected or be more difficult to cure @covid19intro2.</font>   
+<font size=3>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Thus, the preliminary purpose of this study is to identify what would be the risk factors for severe COVID-19 based on the datasets of COVID-19 cases in Toronto @data. In this case, we could also based on the data analysis to give suggestions on prevention and treatment to those people with higher risk for severe COVID-19 to prevent them from serious illness and minimize casualties from the outbreak the COVID-19 pandemic.</font>  
+
+# II.Data Analysis
+<font size=3>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The dataset was derived from all COVID-19 cases reported to and managed by Toronto Public Health @data. This dataset contains 18 variables on 17872 observations/patients in Toronto. All the variables collected here are categorical variables, and they can be grouped into 6 categories: identification(e.g: Assigned ID), demographic(e.g: age group, gender), source(e.g: neighborhood name, source of infection), time(e.g: episode date), treatment(e.g: ever hospitalized) and outcome(e.g: the illness is confirmed or probable, recovered or have a fatal outcome) information.</font>  
+<font size=3>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Here, I consider the variable "Outcome" as my response variable. If the outcome shows "fatal" or "active" rather than "resolved", it means that the this patient is more likely to have risk for severe COVID-19.</font>    
+<font size=3>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Before doing analysis, I firstly remove ineffective identification variables, repeated variables and data with missing values(include value with no meaning. e.g:NaN). So, there left 13 variables and 16977 observations. As I aim to identify the risk factors for severe COVID-19, I redefine the response as a binary classification: resolved or not recovered. Because, I think the risks could be shown in this way: if a large proportion of patients get sick because a characteristic and is not cured, then that characteristic is likely to be a risk factor.</font>  
+<font size=3>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Based on this criteria and response variable I do analysis on datas below:</font> 
+```{r echo=FALSE, results='hide'}
+library(opendatatoronto)
+library(tidyverse)
+library(dplyr)
+
+# get package
+package <- show_package("64b54586-6180-4485-83eb-81e8fae3b8fe")
+package
+
+# get all resources for this package
+resources <- list_package_resources("64b54586-6180-4485-83eb-81e8fae3b8fe")
+
+# identify datastore resources; by default, Toronto Open Data sets datastore resource format to CSV for non-geospatial and GeoJSON for geospatial resources
+datastore_resources <- filter(resources, tolower(format) %in% c('csv', 'geojson'))
+
+# load the first datastore resource as a sample
+data <- filter(datastore_resources, row_number()==1) %>% get_resource()
+data
+
+#check missing values#
+colSums(is.na(data))
+#Remove some variables#
+data1 <- data %>% select(3:12,16:18)
+
+#check data types
+str(data1)
+
+#divide three types of outcomes into two#
+#create new variables#
+data2 = data1
+data2$Outcome = as.factor(ifelse(data2$Outcome == "RESOLVED", "Resolved", "No"))
+```
+       
+       
+       
+<font size=5>-Age:</font>  
+<font size=3>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;From Pic.1 we could find that people in different age groups have different probability for not cured. So, age might be a risk factor. And especially for peoples with age elder than 70, they have higher probability of not cured than other ages which means that they tend to have higher risk for severe COVID-19. This result prove one of the guess of potential risks by CDC @covid19intro2, but it's a little bit higher than the conclusion in the report published by MASSACHUSETTS GENERAL HOSPITAL @HOSPITAL.</font>  
+     
+```{r echo=FALSE}
+#Data processing
+#1)Age
+#Remove the observation with invalid data
+data2 <- data2 %>% filter(`Age Group` != "NaN") %>% 
+  filter(`Source of Infection` !="Unknown/Missing") %>%
+  filter(`Client Gender` != "UNKNOWN")
+#Test whether there are differences in the probability of resolved at different ages#
+data3 <- data2%>% group_by(`Age Group`) %>% 
+  mutate(`probability for not cured in different age` = mean(Outcome == "No"))
+#graph
+ggplot(data3, aes(x = `Age Group`, y = `probability for not cured in different age`)) + 
+  geom_point() + labs(title = "Pic.1: Probability of not cured at different ages") + 
+  theme(axis.text.x = element_text(angle = 50, hjust = 1))
+```
+
+
+     
+# Appendix
+
+<font size=3>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Code and data supporting this analysis is available at:https://github.com/erikaaa233/Erika-STA304-A1</font>   
+
+
+# References
